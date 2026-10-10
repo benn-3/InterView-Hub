@@ -1,0 +1,90 @@
+@import './styles/global.css';
+@import './styles/responsive.css';
+
+/* Syntax Highlighting Styles (GitHub Dark / Light compatible) */
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1.25rem;
+}
+
+code.hljs {
+  padding: 3px 5px;
+}
+
+/* Syntax Tokens */
+.hljs-comment,
+.hljs-quote {
+  color: #8b949e;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: #ff7b72;
+  font-weight: 600;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+  color: #79c0ff;
+}
+
+.hljs-string,
+.hljs-doctag {
+  color: #a5d6ff;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #d2a8ff;
+  font-weight: 600;
+}
+
+.hljs-title.class_,
+.hljs-class .hljs-title {
+  color: #ffa657;
+}
+
+.hljs-type,
+.hljs-built_in {
+  color: #ffa657;
+}
+
+.hljs-attr,
+.hljs-attribute {
+  color: #79c0ff;
+}
+
+.hljs-bullet,
+.hljs-link,
+.hljs-symbol {
+  color: #a5d6ff;
+}
+
+.hljs-meta {
+  color: #7ee787;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-deletion {
+  color: #ffa198;
+  background-color: #490202;
+}
+
+.hljs-addition {
+  color: #7ee787;
+  background-color: #04260f;
+}

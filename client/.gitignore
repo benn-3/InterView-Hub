@@ -1,0 +1,17 @@
+# Client build output and dependencies
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Environment files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories and system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

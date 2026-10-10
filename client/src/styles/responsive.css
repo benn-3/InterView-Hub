@@ -1,0 +1,13 @@
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 240px;
+    --toc-width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --header-height: 56px;
+  }
+}

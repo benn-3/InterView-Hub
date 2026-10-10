@@ -1,0 +1,174 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createApp } from '../src/app.js';
+import { verifyGoogleIdToken } from '../src/services/googleAuthService.js';
+
+test('Backend Health & Security Test Suite', async (t) => {
+  const app = createApp();
+
+  await t.test('1. Google ID Token Verification rejects missing or empty tokens', async () => {
+    await assert.rejects(
+      async () => {
+        await verifyGoogleIdToken('');
+      },
+      {
+        message: 'Missing or invalid Google ID token',
+      }
+    );
+
+    await assert.rejects(
+      async () => {
+        await verifyGoogleIdToken(null);
+      },
+      {
+        message: 'Missing or invalid Google ID token',
+      }
+    );
+  });
+
+  await t.test('2. /api/health endpoint returns 200 OK', async () => {
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    try {
+      const res = await fetch(`http://localhost:${port}/api/health`);
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.status, 'ok');
+      assert.equal(data.service, 'interview-guide-backend');
+    } finally {
+      server.close();
+    }
+  });
+
+  await t.test('3. /api/auth/me returns unauthenticated status for anonymous visitor', async () => {
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    try {
+      const res = await fetch(`http://localhost:${port}/api/auth/me`);
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.success, true);
+      assert.equal(data.authenticated, false);
+      assert.equal(data.user, null);
+    } finally {
+      server.close();
+    }
+  });
+
+  await t.test('4. Protected endpoints reject requests without active session with 401', async () => {
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    try {
+      // User Profile
+      const resUser = await fetch(`http://localhost:${port}/api/users/me`);
+      assert.equal(resUser.status, 401);
+      const dataUser = await resUser.json();
+      assert.equal(dataUser.authenticated, false);
+
+      // Study Progress
+      const resProgress = await fetch(`http://localhost:${port}/api/progress`);
+      assert.equal(resProgress.status, 401);
+
+      // Quiz History
+      const resQuiz = await fetch(`http://localhost:${port}/api/quizzes/history`);
+      assert.equal(resQuiz.status, 401);
+
+      // Complete Lesson action
+      const resComplete = await fetch(`http://localhost:${port}/api/progress/lessons/oop_poly/complete`, {
+        method: 'POST',
+      });
+      assert.equal(resComplete.status, 401);
+    } finally {
+      server.close();
+    }
+  });
+
+  await t.test('5. Non-existent API routes return 404', async () => {
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    try {
+      const res = await fetch(`http://localhost:${port}/api/non_existent_endpoint`);
+      assert.equal(res.status, 404);
+      const data = await res.json();
+      assert.equal(data.success, false);
+    } finally {
+      server.close();
+    }
+  });
+
+  await t.test('6. Dynamic streak tracking: handles first activity, same-day deduplication, consecutive days, missed days, and longest streak preservation', async () => {
+    const { recordUserActivityStreak, computeActiveStreak, getCalendarDate } = await import('../src/services/streakService.js');
+
+    const mockUser = {
+      streak: {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActivityDate: null,
+        totalActivities: 0,
+      },
+    };
+
+    // 1. Initial state (brand new user with no activity)
+    const initialActive = computeActiveStreak(mockUser.streak, 'UTC');
+    assert.equal(initialActive.currentStreak, 0);
+    assert.equal(initialActive.longestStreak, 0);
+    assert.equal(initialActive.isActiveToday, false);
+
+    // 2. Day 1: User completes first qualifying activity
+    // Simulate Day 1 as '2026-10-01'
+    mockUser.streak.lastActivityDate = null;
+    const day1Streak = recordUserActivityStreak(mockUser, 'UTC');
+    assert.equal(mockUser.streak.currentStreak, 1);
+    assert.equal(mockUser.streak.longestStreak, 1);
+    assert.equal(mockUser.streak.totalActivities, 1);
+
+    // 3. Day 1: Second activity on the exact same day (must not increment streak)
+    recordUserActivityStreak(mockUser, 'UTC');
+    assert.equal(mockUser.streak.currentStreak, 1);
+    assert.equal(mockUser.streak.longestStreak, 1);
+    assert.equal(mockUser.streak.totalActivities, 2);
+
+    // 4. Consecutive day: Yesterday was Day 1, today is Day 2
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    mockUser.streak.lastActivityDate = getCalendarDate(yesterday, 'UTC');
+    // Before studying today, streak remains active (grace period)
+    const morningActive = computeActiveStreak(mockUser.streak, 'UTC');
+    assert.equal(morningActive.currentStreak, 1);
+    assert.equal(morningActive.isActiveToday, false);
+
+    // Now user completes activity today
+    recordUserActivityStreak(mockUser, 'UTC');
+    assert.equal(mockUser.streak.currentStreak, 2);
+    assert.equal(mockUser.streak.longestStreak, 2);
+
+    // 5. Missed calendar day: User missed yesterday (e.g. last active 3 days ago)
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+    mockUser.streak.lastActivityDate = getCalendarDate(threeDaysAgo, 'UTC');
+    const brokenActive = computeActiveStreak(mockUser.streak, 'UTC');
+    assert.equal(brokenActive.currentStreak, 0, 'Missed day must drop active streak to 0');
+    assert.equal(brokenActive.longestStreak, 2, 'Longest streak must be preserved');
+
+    // 6. User resumes today after broken streak: restarts at 1, longest preserved at 2
+    recordUserActivityStreak(mockUser, 'UTC');
+    assert.equal(mockUser.streak.currentStreak, 1);
+    assert.equal(mockUser.streak.longestStreak, 2, 'Longest streak must never decrease');
+  });
+
+  await t.test('7. /api/progress/dashboard rejects unauthenticated requests with 401', async () => {
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    try {
+      const res = await fetch(`http://localhost:${port}/api/progress/dashboard`);
+      assert.equal(res.status, 401);
+      const data = await res.json();
+      assert.equal(data.authenticated, false);
+    } finally {
+      server.close();
+    }
+  });
+});
