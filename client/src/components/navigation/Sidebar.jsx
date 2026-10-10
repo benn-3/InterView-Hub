@@ -20,7 +20,7 @@ import {
 import './Sidebar.css';
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: Home },
+  { path: '/dashboard', label: 'Dashboard', icon: Home },
   { path: '/subjects', label: 'Subjects', icon: BookOpen },
   { path: '/questions', label: 'Questions', icon: HelpCircle },
   { path: '/search', label: 'Search', icon: Search },
@@ -54,7 +54,7 @@ export default function Sidebar({
       <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
         {/* Brand Header */}
         <div className="sidebar-header">
-          <NavLink to="/" className="sidebar-brand" onClick={onCloseMobile}>
+          <NavLink to="/dashboard" className="sidebar-brand" onClick={onCloseMobile}>
             <div className="brand-icon-box">
               <Zap size={20} fill="currentColor" />
             </div>
@@ -84,7 +84,7 @@ export default function Sidebar({
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === '/'}
+                end={item.path === '/dashboard'}
                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                 onClick={onCloseMobile}
                 title={collapsed ? item.label : undefined}
@@ -95,12 +95,6 @@ export default function Sidebar({
             );
           })}
         </nav>
-
-        {/* Footer */}
-        <div className="sidebar-footer">
-          <p>© 2026 Interview Hub</p>
-          <p style={{ color: 'var(--accent-secondary)' }}>Frontend Only Edition</p>
-        </div>
       </aside>
     </>
   );

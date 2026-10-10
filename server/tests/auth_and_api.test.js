@@ -216,4 +216,94 @@ test('Backend Health & Security Test Suite', async (t) => {
       server.close();
     }
   });
+
+  await t.test('10. End-to-end SSO session cycle, user data isolation, and logout invalidation', async () => {
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    try {
+      // 1. Authenticate Alice with verified Google token
+      const aliceLoginRes = await fetch(`http://localhost:${port}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: 'mock_dev_token_alice' }),
+      });
+      assert.equal(aliceLoginRes.status, 200);
+      const aliceLoginData = await aliceLoginRes.json();
+      assert.equal(aliceLoginData.authenticated, true);
+      assert.equal(aliceLoginData.user.email, 'dev.alice@gmail.com');
+
+      // Extract Alice's session cookie
+      const rawAliceCookie = aliceLoginRes.headers.get('set-cookie');
+      assert.ok(rawAliceCookie, 'Session cookie must be returned on login');
+      const aliceCookie = rawAliceCookie.split(';')[0];
+
+      // 2. Restore session via /api/auth/me with Alice's cookie
+      const aliceMeRes = await fetch(`http://localhost:${port}/api/auth/me`, {
+        headers: { Cookie: aliceCookie },
+      });
+      assert.equal(aliceMeRes.status, 200);
+      const aliceMeData = await aliceMeRes.json();
+      assert.equal(aliceMeData.authenticated, true);
+      assert.equal(aliceMeData.user.email, 'dev.alice@gmail.com');
+
+      // 3. Save Alice's progress (sync completed lessons)
+      const syncRes = await fetch(`http://localhost:${port}/api/progress`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: aliceCookie,
+        },
+        body: JSON.stringify({
+          completedLessonIds: ['dsa_binary_search', 'sql_joins'],
+          bookmarkedLessonIds: ['aws_ec2'],
+        }),
+      });
+      assert.equal(syncRes.status, 200);
+
+      // Verify Alice's saved progress
+      const aliceProgRes = await fetch(`http://localhost:${port}/api/progress`, {
+        headers: { Cookie: aliceCookie },
+      });
+      assert.equal(aliceProgRes.status, 200);
+      const aliceProgData = await aliceProgRes.json();
+      assert.deepEqual(aliceProgData.progress.completedLessonIds, ['dsa_binary_search', 'sql_joins']);
+
+      // 4. Authenticate Bob with distinct Google account
+      const bobLoginRes = await fetch(`http://localhost:${port}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: 'mock_dev_token_bob' }),
+      });
+      assert.equal(bobLoginRes.status, 200);
+      const bobLoginData = await bobLoginRes.json();
+      assert.equal(bobLoginData.user.email, 'dev.bob@gmail.com');
+
+      const rawBobCookie = bobLoginRes.headers.get('set-cookie');
+      const bobCookie = rawBobCookie.split(';')[0];
+
+      // 5. Verify User Isolation: Bob must NOT see Alice's data
+      const bobProgRes = await fetch(`http://localhost:${port}/api/progress`, {
+        headers: { Cookie: bobCookie },
+      });
+      assert.equal(bobProgRes.status, 200);
+      const bobProgData = await bobProgRes.json();
+      assert.deepEqual(bobProgData.progress.completedLessonIds, [], 'Bob cannot access Alice private progress');
+
+      // 6. Sign out Alice via /api/auth/logout
+      const aliceLogoutRes = await fetch(`http://localhost:${port}/api/auth/logout`, {
+        method: 'POST',
+        headers: { Cookie: aliceCookie },
+      });
+      assert.equal(aliceLogoutRes.status, 200);
+
+      // 7. Verify Alice session is revoked: subsequent request must return 401
+      const aliceRevokedRes = await fetch(`http://localhost:${port}/api/progress`, {
+        headers: { Cookie: aliceCookie },
+      });
+      assert.equal(aliceRevokedRes.status, 401, 'Logged out session must reject requests with 401');
+    } finally {
+      server.close();
+    }
+  });
 });

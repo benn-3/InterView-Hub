@@ -40,6 +40,15 @@ export function AuthProvider({ children }) {
     checkSession();
   }, [checkSession]);
 
+  useEffect(() => {
+    const handleExpired = () => {
+      console.info('[Auth] Server session expired. Resetting authenticated state.');
+      setUser(null);
+    };
+    window.addEventListener('interview_session_expired', handleExpired);
+    return () => window.removeEventListener('interview_session_expired', handleExpired);
+  }, []);
+
   /**
    * Migrate anonymous localStorage data to backend on login
    */

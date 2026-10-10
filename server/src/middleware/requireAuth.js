@@ -18,8 +18,15 @@ export async function requireAuth(req, res, next) {
 
     if (!user) {
       // Session exists but user was deleted
+      const cookieName = process.env.SESSION_COOKIE_NAME || 'interview_hub_sid';
+      const isDeployed = process.env.NODE_ENV === 'production' || Boolean(process.env.RENDER) || Boolean(process.env.VERCEL);
       req.session.destroy(() => {});
-      res.clearCookie('connect.sid');
+      res.clearCookie(cookieName, {
+        path: '/',
+        httpOnly: true,
+        secure: isDeployed,
+        sameSite: isDeployed ? 'none' : 'lax',
+      });
       return res.status(401).json({
         success: false,
         error: 'User account no longer exists. Session invalidated.',

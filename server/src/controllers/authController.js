@@ -123,6 +123,7 @@ export function logout(req, res, next) {
   }
 
   const cookieName = process.env.SESSION_COOKIE_NAME || 'interview_hub_sid';
+  const isDeployed = process.env.NODE_ENV === 'production' || Boolean(process.env.RENDER) || Boolean(process.env.VERCEL);
 
   req.session.destroy((err) => {
     if (err) {
@@ -131,8 +132,8 @@ export function logout(req, res, next) {
     res.clearCookie(cookieName, {
       path: '/',
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isDeployed,
+      sameSite: isDeployed ? 'none' : 'lax',
     });
     return res.status(200).json({
       success: true,

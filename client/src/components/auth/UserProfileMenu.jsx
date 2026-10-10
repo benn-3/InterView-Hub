@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   LogIn,
   LogOut,
@@ -15,6 +15,7 @@ import GoogleLoginModal from './GoogleLoginModal';
 
 export default function UserProfileMenu() {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const menuRef = useRef(null);
@@ -172,6 +173,25 @@ export default function UserProfileMenu() {
           {/* Quick links */}
           <div style={{ padding: '0.5rem' }}>
             <Link
+              to="/dashboard"
+              onClick={() => setDropdownOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                padding: '0.5rem 0.75rem',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                fontSize: '0.825rem',
+                fontWeight: 600
+              }}
+            >
+              <BarChart3 size={15} color="var(--accent-secondary)" />
+              <span>Go to Dashboard</span>
+            </Link>
+
+            <Link
               to="/bookmarks"
               onClick={() => setDropdownOpen(false)}
               style={{
@@ -232,9 +252,10 @@ export default function UserProfileMenu() {
           {/* Sign Out */}
           <div style={{ padding: '0.5rem', borderTop: '1px solid var(--border-color)' }}>
             <button
-              onClick={() => {
+              onClick={async () => {
                 setDropdownOpen(false);
-                logout();
+                await logout();
+                navigate('/', { replace: true });
               }}
               style={{
                 display: 'flex',

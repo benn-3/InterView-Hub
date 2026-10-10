@@ -135,17 +135,6 @@
   flex: 1;
 }
 
-.sidebar-footer {
-  padding: 1rem;
-  border-top: 1px solid var(--border-color);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.sidebar.collapsed .sidebar-footer {
-  display: none;
-}
-
 /* Mobile Drawer Overlay */
 .sidebar-overlay {
   display: none;

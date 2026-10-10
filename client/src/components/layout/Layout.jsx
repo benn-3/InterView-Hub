@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from '../navigation/Sidebar';
 import Header from '../navigation/Header';
 import SearchModal from '../common/SearchModal';
+import Footer from './Footer';
 import { getTheme, setTheme } from '../../utils/storage';
 import './Layout.css';
 
@@ -57,6 +58,8 @@ export default function Layout() {
         <main className="content-container">
           <Outlet />
         </main>
+
+        <Footer />
       </div>
 
       {/* Global Search Modal */}

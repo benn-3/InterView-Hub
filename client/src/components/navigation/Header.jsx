@@ -6,7 +6,7 @@ import UserProfileMenu from '../auth/UserProfileMenu';
 import './Header.css';
 
 const PAGE_TITLES = {
-  '/': 'Dashboard',
+  '/dashboard': 'Dashboard',
   '/subjects': 'Study Subjects',
   '/questions': 'Interview Q&A Library',
   '/search': 'Global Search',

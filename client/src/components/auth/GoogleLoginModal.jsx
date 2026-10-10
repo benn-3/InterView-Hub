@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { X, ShieldCheck, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-export default function GoogleLoginModal({ isOpen, onClose }) {
+export default function GoogleLoginModal({ isOpen, onClose, onSuccess }) {
   const { loginWithGoogle, loading, authError } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [internalError, setInternalError] = useState(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [gisLoaded, setGisLoaded] = useState(!!window.google?.accounts?.id);
@@ -61,6 +64,12 @@ export default function GoogleLoginModal({ isOpen, onClose }) {
         }
         await loginWithGoogle(response.credential);
         onClose();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          const dest = location.state?.from?.pathname || '/dashboard';
+          navigate(dest, { replace: true });
+        }
       } catch (err) {
         setInternalError(err.message || 'Google sign-in failed');
       } finally {
@@ -104,6 +113,12 @@ export default function GoogleLoginModal({ isOpen, onClose }) {
       const mockToken = `mock_dev_token_${Date.now()}_${role}`;
       await loginWithGoogle(mockToken);
       onClose();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        const dest = location.state?.from?.pathname || '/dashboard';
+        navigate(dest, { replace: true });
+      }
     } catch (err) {
       setInternalError(err.message || 'Developer test login failed');
     } finally {

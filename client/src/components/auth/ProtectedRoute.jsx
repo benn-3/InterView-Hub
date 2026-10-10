@@ -1,64 +1,99 @@
-import React, { useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import GoogleLoginModal from './GoogleLoginModal';
-import { Lock, LogIn } from 'lucide-react';
+import React from 'react';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { Zap, Loader2 } from 'lucide-react';
 
-export default function ProtectedRoute({ children, fallbackRedirect = null }) {
+/**
+ * Reusable route protection guard.
+ * Prevents unauthorized access to private learning content, dashboards, bookmarks, and settings.
+ * Displays a non-flickering loading state while verifying sessions on startup.
+ */
+export default function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
-  const [showLoginModal, setShowLoginModal] = useState(false);
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '1rem', color: 'var(--text-secondary)' }}>
-        <div style={{ width: '36px', height: '36px', border: '3px solid var(--border-color)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <p>Verifying secure session...</p>
+      <div
+        className="auth-loading-screen"
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--bg-primary)',
+          color: 'var(--text-primary)',
+          gap: '1.25rem',
+          padding: '2rem',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+          }}
+        >
+          <div
+            style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              boxShadow: 'var(--shadow-glow)',
+            }}
+          >
+            <Zap size={24} fill="currentColor" />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+              INTERVIEW<span style={{ color: 'var(--accent-secondary)' }}>HUB</span>
+            </span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
+              Technical Prep
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            color: 'var(--text-secondary)',
+            fontSize: '0.9rem',
+            fontWeight: 500,
+          }}
+        >
+          <Loader2
+            size={18}
+            style={{
+              animation: 'spin 1s linear infinite',
+              color: 'var(--accent-primary)',
+            }}
+          />
+          <span>Restoring verified session...</span>
+        </div>
+
+        <style>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    if (fallbackRedirect) {
-      return <Navigate to={fallbackRedirect} state={{ from: location }} replace />;
-    }
-
-    return (
-      <div style={{ maxWidth: '600px', margin: '4rem auto', padding: '2.5rem', background: 'var(--surface)', border: '1px solid var(--border-color)', borderRadius: '16px', textAlign: 'center', boxShadow: '0 8px 30px rgba(0,0,0,0.1)' }}>
-        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
-          <Lock size={32} />
-        </div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem', color: 'var(--text-primary)' }}>Sign In Required</h2>
-        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '2rem' }}>
-          This page requires an authenticated account to securely store your personal interview prep milestones, progress analytics, and cloud history in MongoDB Atlas.
-        </p>
-        <button
-          onClick={() => setShowLoginModal(true)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1.75rem',
-            background: 'var(--accent)',
-            color: '#fff',
-            fontWeight: '600',
-            borderRadius: '10px',
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)',
-            transition: 'transform 0.15s ease'
-          }}
-        >
-          <LogIn size={18} />
-          Sign In with Google
-        </button>
-
-        {showLoginModal && (
-          <GoogleLoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
-        )}
-      </div>
-    );
+    // Redirect unauthenticated visitors to public landing page while preserving requested destination
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  return children;
+  return children ? children : <Outlet />;
 }

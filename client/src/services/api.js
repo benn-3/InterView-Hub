@@ -27,6 +27,9 @@ async function request(endpoint, options = {}) {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
+      if (res.status === 401 && !normalizedEndpoint.includes('/auth/me')) {
+        window.dispatchEvent(new CustomEvent('interview_session_expired'));
+      }
       const error = new Error(data.error || `HTTP error ${res.status}`);
       error.status = res.status;
       error.details = data;
