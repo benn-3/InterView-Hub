@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Layout from './components/layout/Layout';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/Login';
@@ -61,6 +62,7 @@ export default function App() {
           {/* Fallback 404 Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Analytics />
       </BrowserRouter>
     </AuthProvider>
   );
