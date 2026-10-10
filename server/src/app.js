@@ -18,6 +18,10 @@ import quizRoutes from './routes/quizRoutes.js';
 export function createApp() {
   const app = express();
   const isProduction = process.env.NODE_ENV === 'production';
+  const isDeployed = isProduction || Boolean(process.env.RENDER) || Boolean(process.env.VERCEL);
+
+  // Trust reverse proxy (Render, Vercel, Cloudflare, Nginx) immediately
+  app.set('trust proxy', 1);
 
   // 1. Security Headers via Helmet
   app.use(
@@ -33,18 +37,24 @@ export function createApp() {
   }
 
   // 3. CORS Configuration
-  const rawOrigins = process.env.ALLOWED_ORIGINS || process.env.CLIENT_URL || process.env.FRONTEND_URL || 'http://localhost:5173,http://localhost:5174';
-  const allowedOrigins = rawOrigins.split(',').map((o) => o.trim());
+  const rawOrigins =
+    process.env.ALLOWED_ORIGINS ||
+    process.env.CLIENT_URL ||
+    process.env.FRONTEND_URL ||
+    'https://inter-view-hub.vercel.app,http://localhost:5173,http://localhost:5174';
+  const allowedOrigins = rawOrigins.split(',').map((o) => o.trim().replace(/\/+$/, ''));
 
   app.use(
     cors({
       origin: (origin, callback) => {
         // Allow requests with no origin (e.g. same-origin SPA, mobile apps, curl, server-to-server)
+        const cleanOrigin = origin ? origin.replace(/\/+$/, '') : null;
         if (
-          !origin ||
-          allowedOrigins.includes(origin) ||
-          (origin && origin.endsWith('.vercel.app')) ||
-          (process.env.VERCEL_URL && origin.includes(process.env.VERCEL_URL))
+          !cleanOrigin ||
+          allowedOrigins.includes(cleanOrigin) ||
+          cleanOrigin.endsWith('.vercel.app') ||
+          cleanOrigin.endsWith('.onrender.com') ||
+          (process.env.VERCEL_URL && cleanOrigin.includes(process.env.VERCEL_URL))
         ) {
           callback(null, true);
         } else {
@@ -63,6 +73,7 @@ export function createApp() {
     max: 600, // limit each IP to 600 requests per window
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
     message: { success: false, error: 'Too many requests. Please slow down.' },
   });
 
@@ -71,6 +82,7 @@ export function createApp() {
     max: 50, // limit login attempts
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
     message: { success: false, error: 'Too many authentication attempts. Please try again later.' },
   });
 
@@ -101,11 +113,6 @@ export function createApp() {
     console.warn('⚠️ [Session] Using MemoryStore fallback. Configure MONGODB_URI for persistent sessions.');
   }
 
-  // If in production behind a proxy (e.g. Render, Heroku, NGINX), trust first proxy
-  if (isProduction) {
-    app.set('trust proxy', 1);
-  }
-
   app.use(
     session({
       name: cookieName,
@@ -115,15 +122,41 @@ export function createApp() {
       store: sessionStore,
       cookie: {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'none' : 'lax',
+        secure: isDeployed,
+        sameSite: isDeployed ? 'none' : 'lax',
         maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
         path: '/',
       },
     })
   );
 
-  // 7. Health Check Route
+  // 7. Root & Health Check Routes
+  app.get('/', (req, res) => {
+    res.status(200).json({
+      status: 'ok',
+      service: 'interview-guide-backend',
+      message: 'Interview Hub API is live and operational',
+      docs: '/api/health',
+      frontend: 'https://inter-view-hub.vercel.app',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  app.get('/api', (req, res) => {
+    res.status(200).json({
+      status: 'ok',
+      service: 'interview-guide-backend',
+      message: 'Interview Hub API v1',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        users: '/api/users',
+        progress: '/api/progress',
+        quizzes: '/api/quizzes',
+      },
+    });
+  });
+
   app.get('/api/health', (req, res) => {
     res.status(200).json({
       status: 'ok',
@@ -140,11 +173,18 @@ export function createApp() {
   app.use('/api/progress', progressRoutes);
   app.use('/api/quizzes', quizRoutes);
 
-  // 9. 404 Handler for API routes
-  app.use('/api/*', (req, res) => {
+  // 9. 404 Handlers
+  app.use('/api', (req, res) => {
     res.status(404).json({
       success: false,
       error: `API route not found: ${req.method} ${req.originalUrl}`,
+    });
+  });
+
+  app.use((req, res) => {
+    res.status(404).json({
+      success: false,
+      error: `Route not found: ${req.method} ${req.originalUrl}`,
     });
   });
 

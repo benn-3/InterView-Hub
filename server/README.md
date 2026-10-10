@@ -89,8 +89,9 @@ SESSION_SECRET=your_long_cryptographically_secure_session_secret_key_here
 GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
 
 # Frontend URL & Allowed CORS Origins
-FRONTEND_URL=http://localhost:5173
-ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
+CLIENT_URL=https://inter-view-hub.vercel.app
+FRONTEND_URL=https://inter-view-hub.vercel.app
+ALLOWED_ORIGINS=https://inter-view-hub.vercel.app,http://localhost:5173,http://localhost:5174
 ```
 
 ### 3. Run the Backend Server

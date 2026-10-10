@@ -51,8 +51,8 @@ cp client/.env.example client/.env
 | Variable | Description | Default / Example |
 |---|---|---|
 | `VITE_GOOGLE_CLIENT_ID` | Google OAuth 2.0 Web Client ID for GIS button | `your-google-client-id.apps.googleusercontent.com` |
-| `VITE_API_BASE_URL` | Base endpoint for API requests | `/api` (uses Vite proxy during local dev) |
-| `VITE_BACKEND_URL` | Local proxy destination for Express backend | `http://localhost:5001` |
+| `VITE_API_BASE_URL` | Base endpoint for API requests | `https://interview-hub-1-1dah.onrender.com/api` |
+| `VITE_BACKEND_URL` | Proxy destination for Express backend | `https://interview-hub-1-1dah.onrender.com` |
 
 > **Security Rule**: Never prefix backend secrets (`MONGODB_URI`, `SESSION_SECRET`) with `VITE_`. Vite embeds all `VITE_*` variables into the public JavaScript bundle.
 
@@ -73,8 +73,8 @@ cp server/.env.example server/.env
 | `MONGODB_URI` | MongoDB Atlas cluster connection URI | Recommended | `mongodb+srv://user:pass@cluster.mongodb.net/interview_guide` |
 | `GOOGLE_CLIENT_ID` | Must match `VITE_GOOGLE_CLIENT_ID` | Recommended | `your-client-id.apps.googleusercontent.com` |
 | `SESSION_SECRET` | Secret key for signed session cookies (32+ chars) | Recommended | Random 32+ character string |
-| `CLIENT_URL` | Client origin for CORS | No | `http://localhost:5173` |
-| `ALLOWED_ORIGINS`| Comma-separated CORS origins | No | `http://localhost:5173,http://localhost:5174` |
+| `CLIENT_URL` | Client origin for CORS | No | `https://inter-view-hub.vercel.app` |
+| `ALLOWED_ORIGINS`| Comma-separated CORS origins | No | `https://inter-view-hub.vercel.app,http://localhost:5173,http://localhost:5174` |
 
 ---
 
@@ -94,9 +94,9 @@ To enable Google Single Sign-On (GIS):
    - Application type: **Web application**.
    - Name: `Interview Hub Web Client`.
    - **Authorized JavaScript origins**:
+     - `https://inter-view-hub.vercel.app`
      - `http://localhost:5173`
      - `http://localhost:5174`
-     - *(Your production frontend URL when deploying)*
    - Authorized redirect URIs: Not required for Google Identity Services popup/One Tap flow.
 5. Copy the generated **Client ID** (ends with `.apps.googleusercontent.com`).
 6. Set this value in both:
@@ -217,6 +217,7 @@ Starts Express with Node's native file watcher on `http://localhost:5001`.
   - `MONGODB_URI`: MongoDB Atlas connection URI
   - `GOOGLE_CLIENT_ID`: Google OAuth Client ID
   - `SESSION_SECRET`: Strong 32+ character random secret
-  - `CLIENT_URL`: Your deployed frontend URL (e.g., `https://interviewhub.yourdomain.com`)
-  - `ALLOWED_ORIGINS`: Comma-separated allowed frontend domains
+  - `CLIENT_URL`: `https://inter-view-hub.vercel.app`
+  - `ALLOWED_ORIGINS`: `https://inter-view-hub.vercel.app,http://localhost:5173,http://localhost:5174`
+  - `SERVER_URL`: `https://interview-hub-1-1dah.onrender.com`
 - **Important**: In production, HTTPS is required for `secure: true` session cookies to function properly across domains.

@@ -1,6 +1,9 @@
 // Centralized API client for Interview Hub backend
 
-const API_BASE = (import.meta.env?.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
+const API_BASE = (
+  import.meta.env?.VITE_API_BASE_URL ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? '/api' : 'https://interview-hub-1-1dah.onrender.com/api')
+).replace(/\/+$/, '');
 
 /**
  * Universal fetch wrapper enforcing JSON headers and credentials

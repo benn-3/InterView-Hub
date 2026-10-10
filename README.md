@@ -161,9 +161,8 @@ PORT=5001
 NODE_ENV=development
 MONGODB_URI=your_mongodb_atlas_connection_string
 GOOGLE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
-SESSION_SECRET=replace_with_a_secure_random_secret_at_least_32_chars
-CLIENT_URL=http://localhost:5173
-ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
+CLIENT_URL=https://inter-view-hub.vercel.app
+ALLOWED_ORIGINS=https://inter-view-hub.vercel.app,http://localhost:5173,http://localhost:5174
 ```
 
 ### 4. Run Both Applications Simultaneously
@@ -229,18 +228,18 @@ All tests use Node.js's native test runner (`node:test`) verifying:
 - Output Directory: `dist` (within `client/`)
 - Environment Variables:
   - `VITE_GOOGLE_CLIENT_ID`
-  - `VITE_API_BASE_URL` (Full URL to production backend, e.g. `https://api.yourdomain.com/api`)
+  - `VITE_API_BASE_URL=https://interview-hub-1-1dah.onrender.com/api`
 
 ### Server (`server/`)
-- Platform: **Render**, **Railway**, **Fly.io**, or **AWS ECS/App Runner**
+- Platform: **Render** ([Live: `https://interview-hub-1-1dah.onrender.com`](https://interview-hub-1-1dah.onrender.com/api/health))
 - Build/Start Command: `node src/server.js`
 - Environment Variables:
   - `NODE_ENV=production`
   - `MONGODB_URI`
   - `GOOGLE_CLIENT_ID`
-  - `SESSION_SECRET`
-  - `CLIENT_URL=https://your-frontend-domain.com`
-  - `ALLOWED_ORIGINS=https://your-frontend-domain.com`
+  - `SERVER_URL=https://interview-hub-1-1dah.onrender.com`
+  - `CLIENT_URL=https://inter-view-hub.vercel.app`
+  - `ALLOWED_ORIGINS=https://inter-view-hub.vercel.app,http://localhost:5173,http://localhost:5174`
 
 ---
 

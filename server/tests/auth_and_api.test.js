@@ -171,4 +171,49 @@ test('Backend Health & Security Test Suite', async (t) => {
       server.close();
     }
   });
+
+  await t.test('8. Root endpoints (GET /, HEAD /, GET /api) return 200 OK for Render and load balancers', async () => {
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    try {
+      // Test GET /
+      const resGetRoot = await fetch(`http://localhost:${port}/`);
+      assert.equal(resGetRoot.status, 200);
+      const rootData = await resGetRoot.json();
+      assert.equal(rootData.status, 'ok');
+
+      // Test HEAD / (Render health check probe)
+      const resHeadRoot = await fetch(`http://localhost:${port}/`, { method: 'HEAD' });
+      assert.equal(resHeadRoot.status, 200);
+
+      // Test GET /api
+      const resGetApi = await fetch(`http://localhost:${port}/api`);
+      assert.equal(resGetApi.status, 200);
+      const apiData = await resGetApi.json();
+      assert.equal(apiData.status, 'ok');
+      assert.ok(apiData.endpoints);
+    } finally {
+      server.close();
+    }
+  });
+
+  await t.test('9. Reverse proxy headers (X-Forwarded-For) pass through rate limiter without error', async () => {
+    const server = app.listen(0);
+    const port = server.address().port;
+
+    try {
+      const res = await fetch(`http://localhost:${port}/api/health`, {
+        headers: {
+          'X-Forwarded-For': '203.0.113.195, 70.41.3.18',
+          'X-Forwarded-Proto': 'https',
+        },
+      });
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.status, 'ok');
+    } finally {
+      server.close();
+    }
+  });
 });
