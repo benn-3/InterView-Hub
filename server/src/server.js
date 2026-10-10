@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Load environment variables from backend/.env
+// Load environment variables from server/.env
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -12,14 +12,13 @@ import { connectDatabase, closeDatabase } from './config/database.js';
 
 const PORT = process.env.PORT || 5001;
 
+// 1. Initialize Express application
+const app = createApp();
+
+// 2. Standalone server startup (local development & container environments)
 async function startServer() {
-  // 1. Attempt connection to MongoDB Atlas
   await connectDatabase();
 
-  // 2. Initialize Express application
-  const app = createApp();
-
-  // 3. Start listening
   const server = app.listen(PORT, () => {
     console.log(`\n======================================================`);
     console.log(`🚀 [Server] Interview Hub Backend running on port ${PORT}`);
@@ -28,7 +27,6 @@ async function startServer() {
     console.log(`======================================================\n`);
   });
 
-  // 4. Graceful Shutdown
   const shutdown = async (signal) => {
     console.log(`\n🛑 [Server] Received ${signal}. Shutting down gracefully...`);
     server.close(async () => {
@@ -37,7 +35,6 @@ async function startServer() {
       process.exit(0);
     });
 
-    // Force close after 10s if hung
     setTimeout(() => {
       console.error('⚠️ [Server] Forced termination after timeout.');
       process.exit(1);
@@ -48,7 +45,12 @@ async function startServer() {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
-startServer().catch((err) => {
-  console.error('💥 [Server] Fatal startup failure:', err);
-  process.exit(1);
-});
+// Only listen on port when executed as standalone script (not in tests or Vercel serverless functions)
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+  startServer().catch((err) => {
+    console.error('💥 [Server] Fatal startup failure:', err);
+    process.exit(1);
+  });
+}
+
+export default app;

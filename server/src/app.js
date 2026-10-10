@@ -7,7 +7,7 @@ import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 
-import { isDbConnected } from './config/database.js';
+import { isDbConnected, connectDatabase } from './config/database.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 import authRoutes from './routes/authRoutes.js';
@@ -39,8 +39,13 @@ export function createApp() {
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-        if (!origin || allowedOrigins.includes(origin)) {
+        // Allow requests with no origin (e.g. same-origin SPA, mobile apps, curl, server-to-server)
+        if (
+          !origin ||
+          allowedOrigins.includes(origin) ||
+          (origin && origin.endsWith('.vercel.app')) ||
+          (process.env.VERCEL_URL && origin.includes(process.env.VERCEL_URL))
+        ) {
           callback(null, true);
         } else {
           callback(new Error(`Origin ${origin} not allowed by CORS`));
