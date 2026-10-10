@@ -20,6 +20,8 @@ import RevisionMode from './pages/Revision';
 import ProgressPage from './pages/Progress';
 import SettingsPage from './pages/Settings';
 import QuestionsPage from './pages/Questions';
+import Companies from './pages/Companies';
+import CompanyDetail from './pages/CompanyDetail';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 
@@ -43,6 +45,8 @@ export default function App() {
               <Route path="/learn/:topicId" element={<StudyMaterial />} />
               <Route path="/learn" element={<Navigate to="/subjects" replace />} />
               <Route path="/questions" element={<QuestionsPage />} />
+              <Route path="/companies" element={<Companies />} />
+              <Route path="/companies/:companyId" element={<CompanyDetail />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
               <Route path="/practice" element={<PracticeHub />} />

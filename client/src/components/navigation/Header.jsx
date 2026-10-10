@@ -9,6 +9,7 @@ const PAGE_TITLES = {
   '/dashboard': 'Dashboard',
   '/subjects': 'Study Subjects',
   '/questions': 'Interview Q&A Library',
+  '/companies': 'Company-Wise Preparation',
   '/search': 'Global Search',
   '/bookmarks': 'Bookmarked Topics',
   '/practice': 'Practice Hub',
@@ -27,6 +28,7 @@ export default function Header({ onOpenMobile, onOpenSearch, theme, onToggleThem
   const getPageTitle = () => {
     if (location.pathname.startsWith('/topic/')) return 'Study Material';
     if (location.pathname.startsWith('/subjects/')) return 'Subject Overview';
+    if (location.pathname.startsWith('/companies/')) return 'Company Preparation Kit';
     return PAGE_TITLES[location.pathname] || 'Interview Preparation';
   };
 

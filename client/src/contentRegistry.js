@@ -178,6 +178,76 @@ export const CURRICULUM_SUBJECTS = [
     icon: 'Server',
     color: '#059669',
     description: 'Scalability, Load balancing, Caching (Redis), CAP theorem, Sharding, Message Queues (Kafka/RabbitMQ), and Microservices.'
+  },
+  {
+    id: 'ai',
+    slug: 'ai',
+    title: 'Artificial Intelligence (AI)',
+    shortTitle: 'AI',
+    category: 'AI & Data Science',
+    icon: 'Cpu',
+    color: '#8b5cf6',
+    description: 'Intelligent agents, A* search, Minimax, Constraint Satisfaction (CSP), Knowledge Representation, PDDL Planning, and AI ethics.'
+  },
+  {
+    id: 'ml',
+    slug: 'ml',
+    title: 'Machine Learning (ML)',
+    shortTitle: 'Machine Learning',
+    category: 'AI & Data Science',
+    icon: 'Layers',
+    color: '#3b82f6',
+    description: 'Supervised & unsupervised learning, Random Forests, XGBoost, SVMs, PCA, regularization, bias-variance tradeoff, and evaluation metrics.'
+  },
+  {
+    id: 'data-science',
+    slug: 'data-science',
+    title: 'Data Science & Analytics',
+    shortTitle: 'Data Science',
+    category: 'AI & Data Science',
+    icon: 'Table',
+    color: '#10b981',
+    description: 'Exploratory Data Analysis, statistics, hypothesis testing, A/B testing, causal inference, Pandas, SQL analytics, and business KPIs.'
+  },
+  {
+    id: 'data-engineering',
+    slug: 'data-engineering',
+    title: 'Data Engineering & Big Data',
+    shortTitle: 'Data Engineering',
+    category: 'AI & Data Science',
+    icon: 'Database',
+    color: '#06b6d4',
+    description: 'ETL vs ELT, Apache Spark, Kafka streaming, dimensional modeling, Delta Lakehouse, Snowflake/BigQuery, and pipeline idempotency.'
+  },
+  {
+    id: 'deep-learning',
+    slug: 'deep-learning',
+    title: 'Deep Learning & Neural Networks',
+    shortTitle: 'Deep Learning',
+    category: 'AI & Data Science',
+    icon: 'Binary',
+    color: '#ec4899',
+    description: 'Backpropagation, PyTorch, CNNs, LSTMs, Transformers, Attention mechanisms, weight initialization, and distributed GPU training.'
+  },
+  {
+    id: 'llms-genai',
+    slug: 'llms-genai',
+    title: 'LLMs & Generative AI',
+    shortTitle: 'LLMs & GenAI',
+    category: 'AI & Data Science',
+    icon: 'Boxes',
+    color: '#f59e0b',
+    description: 'Transformer decoders, LoRA/QLoRA fine-tuning, RAG, hybrid search, vector databases, MCP protocol, LLM agents, and guardrails.'
+  },
+  {
+    id: 'mlops',
+    slug: 'mlops',
+    title: 'MLOps & AI Engineering',
+    shortTitle: 'MLOps',
+    category: 'AI & Data Science',
+    icon: 'Workflow',
+    color: '#14b8a6',
+    description: 'ML lifecycle, MLflow registries, DVC versioning, Feast feature stores, Triton inference serving, data/concept drift, and LLMOps.'
   }
 ];
 
@@ -207,7 +277,14 @@ export const matchesSubject = (itemSubject, targetSubjectId) => {
     kubernetes: ['kubernetes', 'k8s', 'orchestration'],
     terraform: ['terraform', 'iac', 'infrastructure-as-code'],
     devsecops: ['devsecops', 'monitoring', 'observability', 'security'],
-    'system-design': ['system-design', 'systemdesign', 'distributed-systems', 'architecture']
+    'system-design': ['system-design', 'systemdesign', 'distributed-systems', 'architecture'],
+    ai: ['ai', 'artificial-intelligence', 'intelligent-agents'],
+    ml: ['ml', 'machine-learning', 'supervised-learning'],
+    'data-science': ['data-science', 'datascience', 'statistics', 'analytics'],
+    'data-engineering': ['data-engineering', 'dataengineering', 'big-data', 'spark', 'kafka'],
+    'deep-learning': ['deep-learning', 'deeplearning', 'neural-networks', 'dl'],
+    'llms-genai': ['llms-genai', 'llm', 'llms', 'generative-ai', 'genai', 'llms-and-generative-ai'],
+    mlops: ['mlops', 'ai-engineering', 'mlops-and-ai-engineering', 'ml-ops']
   };
 
   const list = aliases[s2] || [s2];
@@ -240,6 +317,9 @@ export const loadAllMarkdownTopics = () => {
       else if (normalizedSubject === 'networking') normalizedSubject = 'networks';
       else if (normalizedSubject === 'operating-systems') normalizedSubject = 'os';
       else if (normalizedSubject === 'web-development') normalizedSubject = 'webdev';
+      else if (normalizedSubject === 'artificial-intelligence') normalizedSubject = 'ai';
+      else if (normalizedSubject === 'machine-learning') normalizedSubject = 'ml';
+      else if (normalizedSubject === 'generative-ai' || normalizedSubject === 'llms') normalizedSubject = 'llms-genai';
 
       const subjectId = normalizedSubject;
       const title = metadata.title || inferredTitle;

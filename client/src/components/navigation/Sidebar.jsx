@@ -15,7 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageSquareCode,
-  HelpCircle
+  HelpCircle,
+  Building2
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -23,6 +24,7 @@ const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: Home },
   { path: '/subjects', label: 'Subjects', icon: BookOpen },
   { path: '/questions', label: 'Questions', icon: HelpCircle },
+  { path: '/companies', label: 'Companies', icon: Building2 },
   { path: '/search', label: 'Search', icon: Search },
   { path: '/bookmarks', label: 'Bookmarks', icon: Bookmark },
   { path: '/practice', label: 'Practice', icon: Brain },

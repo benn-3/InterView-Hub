@@ -15,7 +15,8 @@ const STORAGE_KEYS = {
   FLASHCARD_PROGRESS: 'interview_hub_flashcard_progress',
   MOCK_PROGRESS: 'interview_hub_mock_progress',
   STUDY_STREAK: 'interview_hub_streak',
-  DAILY_ACTIVITY: 'interview_hub_daily_activity'
+  DAILY_ACTIVITY: 'interview_hub_daily_activity',
+  COMPANY_PREP: 'interview_hub_company_prep'
 };
 
 // Safe JSON parse helper
@@ -502,6 +503,38 @@ export const resetProgress = () => {
   setToStorage(STORAGE_KEYS.SQL_PROGRESS, { solved: [], savedQueries: {} });
   setToStorage(STORAGE_KEYS.FLASHCARD_PROGRESS, { known: [], needsRevision: [] });
   setToStorage(STORAGE_KEYS.MOCK_PROGRESS, { completedSessions: 0, answers: {} });
+  setToStorage(STORAGE_KEYS.COMPANY_PREP, {});
+};
+
+// Company Preparation Tracking
+export const getCompanyPrep = (companyId) => {
+  const allPrep = getFromStorage(STORAGE_KEYS.COMPANY_PREP, {});
+  return allPrep[companyId] || { completedChecklist: [], targetRole: null, notes: '' };
+};
+
+export const toggleCompanyChecklistItem = (companyId, checklistItemId) => {
+  const allPrep = getFromStorage(STORAGE_KEYS.COMPANY_PREP, {});
+  const current = allPrep[companyId] || { completedChecklist: [], targetRole: null, notes: '' };
+  const list = current.completedChecklist || [];
+  const exists = list.includes(checklistItemId);
+  const updated = exists ? list.filter(id => id !== checklistItemId) : [...list, checklistItemId];
+
+  allPrep[companyId] = {
+    ...current,
+    completedChecklist: updated
+  };
+  setToStorage(STORAGE_KEYS.COMPANY_PREP, allPrep);
+  return updated;
+};
+
+export const setCompanyTargetRole = (companyId, roleId) => {
+  const allPrep = getFromStorage(STORAGE_KEYS.COMPANY_PREP, {});
+  const current = allPrep[companyId] || { completedChecklist: [], targetRole: null, notes: '' };
+  allPrep[companyId] = {
+    ...current,
+    targetRole: roleId
+  };
+  setToStorage(STORAGE_KEYS.COMPANY_PREP, allPrep);
 };
 
 export const resetAllData = () => {

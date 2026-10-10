@@ -1,7 +1,9 @@
 // Centralized Master Technical Interview Questions Dataset
-// Contains 8+ detailed, technically accurate interview questions for all 15 curriculum subjects.
+// Contains comprehensive technical interview questions across core CS, Cloud/DevOps, and AI/Data subjects.
 
-export const interviewQuestionsData = [
+import { aiCurriculumQuestions } from './aiCurriculumQuestions.js';
+
+const baseInterviewQuestionsData = [
   // ==================== 1. OOP ====================
   {
     id: 'mock_1',
@@ -1954,4 +1956,9 @@ export const interviewQuestionsData = [
     expectedConcepts: ['Layer 4 vs Layer 7', 'Path-Based Routing', 'TLS Termination', 'Sticky Sessions'],
     relatedTopicId: 'system-design_scalability-and-load-balancing'
   }
+];
+
+export const interviewQuestionsData = [
+  ...baseInterviewQuestionsData,
+  ...aiCurriculumQuestions
 ];

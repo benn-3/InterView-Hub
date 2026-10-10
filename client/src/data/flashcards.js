@@ -1,7 +1,9 @@
 // Centralized Master Flashcards Dataset
-// Contains 5+ memory recall flashcards for all 15 curriculum subjects.
+// Contains memory recall flashcards across all curriculum subjects.
 
-export const flashcardsData = [
+import { aiCurriculumFlashcards } from './aiCurriculumFlashcards.js';
+
+const baseFlashcardsData = [
   // ==================== 1. OOP ====================
   {
     id: 'fc_1',
@@ -556,4 +558,9 @@ export const flashcardsData = [
     back: 'Tokens are added to a bucket at a fixed rate up to a max capacity. Each request consumes 1 token. Allows traffic bursts up to capacity while enforcing average rate limits.',
     category: 'Rate Limiting'
   }
+];
+
+export const flashcardsData = [
+  ...baseFlashcardsData,
+  ...aiCurriculumFlashcards
 ];

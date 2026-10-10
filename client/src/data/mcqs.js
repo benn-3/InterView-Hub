@@ -1,7 +1,9 @@
 // Centralized Master Multiple Choice Questions Dataset
-// Contains 5+ verified, technically accurate MCQs for all 15 curriculum subjects.
+// Contains verified, technically accurate MCQs across all curriculum subjects.
 
-export const mcqsData = [
+import { aiCurriculumMcqs } from './aiCurriculumMcqs.js';
+
+const baseMcqsData = [
   // ==================== 1. OOP ====================
   {
     id: 'mcq_1',
@@ -1232,4 +1234,9 @@ export const mcqsData = [
     tags: ['system-design', 'resilience', 'circuit-breaker'],
     relatedTopicId: 'system-design_microservices-and-messaging'
   }
+];
+
+export const mcqsData = [
+  ...baseMcqsData,
+  ...aiCurriculumMcqs
 ];
